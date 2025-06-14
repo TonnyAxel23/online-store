@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - Online Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Checkout</h1>
+        <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+    </header>
+
+    <div class="checkout-container">
+        <div class="checkout-summary">
+            <h2>Order Summary</h2>
+            <div class="order-items" id="order-items">
+                <!-- Order items will be loaded here -->
+            </div>
+            <div class="order-total">
+                <p>Total: $<span id="order-total">0.00</span></p>
+            </div>
+        </div>
+
+        <div class="checkout-form">
+            <h2>Customer Information</h2>
+            <form id="checkout-form">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="address">Shipping Address</label>
+                    <textarea id="address" name="address" rows="3" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="payment">Payment Method</label>
+                    <select id="payment" name="payment" required>
+                        <option value="">Select payment method</option>
+                        <option value="credit">Credit Card</option>
+                        <option value="debit">Debit Card</option>
+                        <option value="paypal">PayPal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="instructions">Special Instructions (optional)</label>
+                    <textarea id="instructions" name="instructions" rows="2"></textarea>
+                </div>
+                <button type="submit" class="submit-order">Place Order</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Confirmation Modal -->
+    <div class="modal" id="confirmation-modal">
+        <div class="modal-content">
+            <h2>Order Confirmed!</h2>
+            <p>Thank you for your purchase.</p>
+            <p>Your order has been placed successfully.</p>
+            <p>A confirmation email has been sent to <span id="confirmation-email"></span>.</p>
+            <button id="return-home">Return to Home</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Load cart items on checkout page
+        document.addEventListener('DOMContentLoaded', () => {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const orderItemsContainer = document.getElementById('order-items');
+            const orderTotal = document.getElementById('order-total');
+            const cartCount = document.getElementById('cart-count');
+            const confirmationModal = document.getElementById('confirmation-modal');
+            const confirmationEmail = document.getElementById('confirmation-email');
+            const returnHomeBtn = document.getElementById('return-home');
+            const checkoutForm = document.getElementById('checkout-form');
+            
+            // Update cart count
+            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            cartCount.textContent = totalItems;
+            
+            // Render order summary
+            if (cart.length === 0) {
+                orderItemsContainer.innerHTML = '<p>Your cart is empty</p>';
+                orderTotal.textContent = '0.00';
+            } else {
+                let total = 0;
+                orderItemsContainer.innerHTML = '';
+                
+                cart.forEach(item => {
+                    const orderItem = document.createElement('div');
+                    orderItem.className = 'order-item';
+                    
+                    const itemTotal = item.price * item.quantity;
+                    total += itemTotal;
+                    
+                    orderItem.innerHTML = `
+                        <div class="order-item-info">
+                            <p class="order-item-name">${item.name} x ${item.quantity}</p>
+                            <p class="order-item-price">$${itemTotal.toFixed(2)}</p>
+                        </div>
+                    `;
+                    
+                    orderItemsContainer.appendChild(orderItem);
+                });
+                
+                orderTotal.textContent = total.toFixed(2);
+            }
+            
+            // Handle form submission
+            checkoutForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const email = document.getElementById('email').value;
+                confirmationEmail.textContent = email;
+                
+                // Show confirmation modal
+                confirmationModal.style.display = 'block';
+                
+                // Clear cart
+                localStorage.removeItem('cart');
+            });
+            
+            // Return home button
+            returnHomeBtn.addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+            
+            // Cart button
+            document.getElementById('cart-btn').addEventListener('click', () => {
+                window.location.href = 'index.html';
+            });
+        });
+    </script>
+</body>
+</html>

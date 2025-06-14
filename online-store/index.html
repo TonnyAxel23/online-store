@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Store</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Online Store</h1>
+        <div class="search-container">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <button id="search-btn">Search</button>
+        </div>
+        <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+    </header>
+
+    <div class="category-filter">
+        <button class="category-btn active" data-category="all">All</button>
+        <button class="category-btn" data-category="electronics">Electronics</button>
+        <button class="category-btn" data-category="clothing">Clothing</button>
+        <button class="category-btn" data-category="home">Home</button>
+    </div>
+
+    <div class="products-container" id="products-container">
+        <!-- Products will be loaded here by JavaScript -->
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal" id="cart-modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Your Cart</h2>
+            <div class="cart-items" id="cart-items">
+                <!-- Cart items will be loaded here -->
+            </div>
+            <div class="cart-total">
+                <p>Total: $<span id="cart-total">0.00</span></p>
+            </div>
+            <button id="checkout-btn">Proceed to Checkout</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

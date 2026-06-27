@@ -8,50 +8,62 @@
 </head>
 <body>
     <header>
-        <h1>Checkout</h1>
-        <button id="cart-btn">Cart (<span id="cart-count">0</span>)</button>
+        <h1>🛍️ <span>Checkout</span></h1>
+        <div class="header-actions">
+            <button id="cart-btn">🛒 Cart (<span id="cart-count">0</span>)</button>
+        </div>
     </header>
 
     <div class="checkout-container">
         <div class="checkout-summary">
-            <h2>Order Summary</h2>
+            <h2>📋 Order Summary</h2>
             <div class="order-items" id="order-items">
-                <!-- Order items will be loaded here -->
+                <!-- Order items loaded here -->
             </div>
             <div class="order-total">
-                <p>Total: $<span id="order-total">0.00</span></p>
+                <p>Total: <span id="order-total">$0.00</span></p>
             </div>
         </div>
 
         <div class="checkout-form">
-            <h2>Customer Information</h2>
-            <form id="checkout-form">
+            <h2>✏️ Customer Information</h2>
+            <form id="checkout-form" novalidate>
                 <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" name="name" required>
+                    <label for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" required placeholder="John Doe">
+                    <div class="error-message">Please enter your full name</div>
                 </div>
                 <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" required>
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" required placeholder="john@example.com">
+                    <div class="error-message">Please enter a valid email address</div>
                 </div>
                 <div class="form-group">
-                    <label for="address">Shipping Address</label>
-                    <textarea id="address" name="address" rows="3" required></textarea>
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" name="phone" placeholder="(123) 456-7890">
                 </div>
                 <div class="form-group">
-                    <label for="payment">Payment Method</label>
+                    <label for="address">Shipping Address *</label>
+                    <textarea id="address" name="address" rows="3" required placeholder="123 Main St, City, State, ZIP"></textarea>
+                    <div class="error-message">Please enter your shipping address</div>
+                </div>
+                <div class="form-group">
+                    <label for="payment">Payment Method *</label>
                     <select id="payment" name="payment" required>
                         <option value="">Select payment method</option>
-                        <option value="credit">Credit Card</option>
-                        <option value="debit">Debit Card</option>
-                        <option value="paypal">PayPal</option>
+                        <option value="credit">💳 Credit Card</option>
+                        <option value="debit">💳 Debit Card</option>
+                        <option value="paypal">💲 PayPal</option>
+                        <option value="apple">🍎 Apple Pay</option>
+                        <option value="google">📱 Google Pay</option>
                     </select>
+                    <div class="error-message">Please select a payment method</div>
                 </div>
                 <div class="form-group">
-                    <label for="instructions">Special Instructions (optional)</label>
-                    <textarea id="instructions" name="instructions" rows="2"></textarea>
+                    <label for="instructions">Special Instructions <span style="color:var(--gray);font-weight:400;">(optional)</span></label>
+                    <textarea id="instructions" name="instructions" rows="2" placeholder="Any special delivery instructions..."></textarea>
                 </div>
-                <button type="submit" class="submit-order">Place Order</button>
+                <button type="submit" class="submit-order">✅ Place Order</button>
             </form>
         </div>
     </div>
@@ -59,81 +71,175 @@
     <!-- Order Confirmation Modal -->
     <div class="modal" id="confirmation-modal">
         <div class="modal-content">
-            <h2>Order Confirmed!</h2>
+            <div class="checkmark">✅</div>
+            <h2>Order Confirmed! 🎉</h2>
             <p>Thank you for your purchase.</p>
             <p>Your order has been placed successfully.</p>
-            <p>A confirmation email has been sent to <span id="confirmation-email"></span>.</p>
-            <button id="return-home">Return to Home</button>
+            <p>A confirmation email has been sent to <strong id="confirmation-email"></strong>.</p>
+            <p style="font-size:0.9rem;color:var(--gray);margin-top:0.5rem;">Order #: <span id="order-number"></span></p>
+            <button id="return-home">🏠 Return to Home</button>
         </div>
     </div>
 
-    <script src="script.js"></script>
     <script>
-        // Load cart items on checkout page
+        // ===== Checkout Page Script =====
         document.addEventListener('DOMContentLoaded', () => {
+            // Get cart from localStorage
             const cart = JSON.parse(localStorage.getItem('cart')) || [];
             const orderItemsContainer = document.getElementById('order-items');
             const orderTotal = document.getElementById('order-total');
             const cartCount = document.getElementById('cart-count');
             const confirmationModal = document.getElementById('confirmation-modal');
             const confirmationEmail = document.getElementById('confirmation-email');
+            const orderNumber = document.getElementById('order-number');
             const returnHomeBtn = document.getElementById('return-home');
             const checkoutForm = document.getElementById('checkout-form');
-            
+
             // Update cart count
-            const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             cartCount.textContent = totalItems;
-            
+
             // Render order summary
             if (cart.length === 0) {
-                orderItemsContainer.innerHTML = '<p>Your cart is empty</p>';
+                orderItemsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🛒</div>
+                        <h3>Your cart is empty</h3>
+                        <p>Add some items before checking out</p>
+                    </div>
+                `;
                 orderTotal.textContent = '0.00';
             } else {
                 let total = 0;
-                orderItemsContainer.innerHTML = '';
-                
-                cart.forEach(item => {
-                    const orderItem = document.createElement('div');
-                    orderItem.className = 'order-item';
-                    
+                orderItemsContainer.innerHTML = cart.map(item => {
                     const itemTotal = item.price * item.quantity;
                     total += itemTotal;
-                    
-                    orderItem.innerHTML = `
-                        <div class="order-item-info">
-                            <p class="order-item-name">${item.name} x ${item.quantity}</p>
-                            <p class="order-item-price">$${itemTotal.toFixed(2)}</p>
+                    return `
+                        <div class="order-item">
+                            <span class="order-item-name">${item.name} × ${item.quantity}</span>
+                            <span class="order-item-price">$${itemTotal.toFixed(2)}</span>
                         </div>
                     `;
-                    
-                    orderItemsContainer.appendChild(orderItem);
-                });
-                
+                }).join('');
                 orderTotal.textContent = total.toFixed(2);
             }
-            
+
+            // Form validation
+            const formFields = {
+                name: { validate: (val) => val.trim().length > 0, error: 'Please enter your full name' },
+                email: { validate: (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val), error: 'Please enter a valid email' },
+                address: { validate: (val) => val.trim().length > 5, error: 'Please enter a valid address' },
+                payment: { validate: (val) => val !== '', error: 'Please select a payment method' }
+            };
+
+            function validateField(fieldId) {
+                const field = document.getElementById(fieldId);
+                const config = formFields[fieldId];
+                if (!config) return true;
+
+                const isValid = config.validate(field.value);
+                field.classList.toggle('error', !isValid);
+                const errorEl = field.closest('.form-group').querySelector('.error-message');
+                if (errorEl) {
+                    errorEl.style.display = isValid ? 'none' : 'block';
+                }
+                return isValid;
+            }
+
+            // Real-time validation
+            Object.keys(formFields).forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.addEventListener('blur', () => validateField(fieldId));
+                    field.addEventListener('input', () => {
+                        if (field.classList.contains('error')) {
+                            validateField(fieldId);
+                        }
+                    });
+                }
+            });
+
             // Handle form submission
             checkoutForm.addEventListener('submit', (e) => {
                 e.preventDefault();
-                
+
+                // Validate all fields
+                let isValid = true;
+                Object.keys(formFields).forEach(fieldId => {
+                    if (!validateField(fieldId)) isValid = false;
+                });
+
+                if (!isValid) {
+                    showNotification('Please fix all errors before submitting', 'error');
+                    return;
+                }
+
+                if (cart.length === 0) {
+                    showNotification('Your cart is empty!', 'error');
+                    return;
+                }
+
+                // Generate order number
+                const orderNum = 'ORD-' + Date.now().toString().slice(-8) + 
+                    '-' + Math.random().toString(36).slice(-4).toUpperCase();
+                orderNumber.textContent = orderNum;
+
+                // Show confirmation
                 const email = document.getElementById('email').value;
                 confirmationEmail.textContent = email;
-                
-                // Show confirmation modal
                 confirmationModal.style.display = 'block';
-                
+                document.body.style.overflow = 'hidden';
+
                 // Clear cart
                 localStorage.removeItem('cart');
+
+                // Update cart count
+                document.getElementById('cart-count').textContent = '0';
+
+                // Scroll to top of modal
+                confirmationModal.scrollIntoView({ behavior: 'smooth' });
             });
-            
-            // Return home button
+
+            // Return home
             returnHomeBtn.addEventListener('click', () => {
                 window.location.href = 'index.html';
             });
-            
+
             // Cart button
             document.getElementById('cart-btn').addEventListener('click', () => {
                 window.location.href = 'index.html';
+            });
+
+            // Notification helper
+            function showNotification(message, type = 'success') {
+                const existing = document.querySelector('.notification');
+                if (existing) existing.remove();
+
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.textContent = message;
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.classList.add('fade-out');
+                    setTimeout(() => notification.remove(), 400);
+                }, 3000);
+            }
+
+            // Close modal on outside click
+            confirmationModal.addEventListener('click', (e) => {
+                if (e.target === confirmationModal) {
+                    confirmationModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
+            });
+
+            // ESC to close modal
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && confirmationModal.style.display === 'block') {
+                    confirmationModal.style.display = 'none';
+                    document.body.style.overflow = '';
+                }
             });
         });
     </script>

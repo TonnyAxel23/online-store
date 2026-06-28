@@ -1,5 +1,5 @@
 // ===== Product Data =====
-const products = [
+const products = [ 
     { id: 1, name: "Smartphone X", category: "electronics", price: 699.99, image: "https://picsum.photos/seed/phone/400/300", description: "Latest smartphone with advanced features" },
     { id: 2, name: "Laptop Pro", category: "electronics", price: 1299.99, image: "https://picsum.photos/seed/laptop/400/300", description: "High-performance laptop for professionals" },
     { id: 3, name: "Wireless Headphones", category: "electronics", price: 199.99, image: "https://picsum.photos/seed/headphones/400/300", description: "Noise-cancelling wireless headphones" },
